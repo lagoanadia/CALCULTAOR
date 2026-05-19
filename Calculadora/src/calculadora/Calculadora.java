@@ -3,6 +3,7 @@ package calculadora;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 
 public class Calculadora {
 
@@ -19,17 +20,18 @@ public class Calculadora {
         display.setEditable(false);
         display.setHorizontalAlignment(JTextField.RIGHT);
         display.setFont(new Font("Arial", Font.BOLD, 24));
-        display.setText("Calculate!");
+        display.setText("");
 
         // ============ Button panel ============
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(4, 4));
+        buttonPanel.setLayout(new GridLayout(5, 4));
 
         String[] labels = {
             "7", "8", "9", "÷",
             "4", "5", "6", "x",
             "1", "2", "3", "-",
-            "C", "0", "<", "+"
+            "C", "0", "<", "+",
+            ".", "="
         };
 
         for (String label : labels) {
@@ -39,16 +41,104 @@ public class Calculadora {
         // ============ Add components to window ============
         window.add(display, BorderLayout.NORTH);
         window.add(buttonPanel, BorderLayout.CENTER);
-        
-        // =========== Event Listeners ======================
-        for (Component c : buttonPanel.getComponents()) 
-        {
-         JButton button = (JButton) c;
-         button.addActionListener(e -> {
-         display.setText(button.getText());
-        });
-}
 
+        // ============ State variables ============
+        double[] firstNumber = {0};
+        String[] operation = {""};
+
+        // ============ Event Listeners ============
+        for (Component c : buttonPanel.getComponents()) {
+            JButton button = (JButton) c;
+            button.addActionListener(e -> {
+                String label = button.getText();
+
+                switch (label) {
+                    // === Operators: chain if needed, then save state ===
+                    case "+": case "-": case "x": case "÷":
+                        if (display.getText().equals("")) {
+                            operation[0] = label;
+                            break;
+                        }
+                        double currentNumber = Double.parseDouble(display.getText());
+
+                        if (!operation[0].equals("")) {
+                            switch (operation[0]) {
+                                case "+": firstNumber[0] = firstNumber[0] + currentNumber; break;
+                                case "-": firstNumber[0] = firstNumber[0] - currentNumber; break;
+                                case "x": firstNumber[0] = firstNumber[0] * currentNumber; break;
+                                case "÷": firstNumber[0] = firstNumber[0] / currentNumber; break;
+                            }
+                            display.setText(String.valueOf(firstNumber[0]));
+                        } else {
+                            firstNumber[0] = currentNumber;
+                        }
+
+                        operation[0] = label;
+                        display.setText("");
+                        break;
+
+                    // === Equals: final calculation + write to history ===
+                    case "=":
+                        if (operation[0].equals("") || display.getText().equals("")) break;
+                        double secondNumber = Double.parseDouble(display.getText());
+                        double result = 0;
+                        switch (operation[0]) {
+                            case "+": result = firstNumber[0] + secondNumber; break;
+                            case "-": result = firstNumber[0] - secondNumber; break;
+                            case "x": result = firstNumber[0] * secondNumber; break;
+                            case "÷": result = firstNumber[0] / secondNumber; break;
+                        }
+
+                        // ===== Write the operation to history.txt =====
+                        try {
+                            PrintWriter writer = new PrintWriter(new FileWriter("history.txt", true));
+                            writer.println(firstNumber[0] + " " + operation[0] + " " + secondNumber + " = " + result);
+                            writer.close();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                        // ===============================================
+
+                        display.setText(String.valueOf(result));
+                        firstNumber[0] = result;
+                        operation[0] = "";
+                        break;
+
+                    // === Clear everything ===
+                    case "C":
+                        display.setText("");
+                        firstNumber[0] = 0;
+                        operation[0] = "";
+                        break;
+
+                    // === Backspace ===
+                    case "<":
+                        String text = display.getText();
+                        if (text.length() > 0) {
+                            display.setText(text.substring(0, text.length() - 1));
+                        }
+                        break;
+
+                    // === Decimal point (only one allowed) ===
+                    case ".":
+                        if (!display.getText().contains(".")) {
+                            if (display.getText().equals("")) {
+                                display.setText("0.");
+                            } else {
+                                display.setText(display.getText() + ".");
+                            }
+                        }
+                        break;
+
+                    // === Numbers 0-9 ===
+                    default:
+                        display.setText(display.getText() + label);
+                        break;
+                }
+            });
+        }
+
+        // ============ Show the window LAST ============
         window.setVisible(true);
     }
 }
