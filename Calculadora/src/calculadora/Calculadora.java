@@ -50,13 +50,14 @@ public class Calculadora {
         for (Component c : buttonPanel.getComponents()) {
             JButton button = (JButton) c;
             button.addActionListener(e -> {
-                String label = button.getText();
+                 
 
-                switch (label) {
-                    // === Operators: chain if needed, then save state ===
+                switch (button.getText()) {
+
                     case "+": case "-": case "x": case "÷":
+//              ========= Shield in case user presses operator after start or wants to change operator =========
                         if (display.getText().equals("")) {
-                            operation[0] = label;
+                            operation[0] = button.getText();
                             break;
                         }
                         double currentNumber = Double.parseDouble(display.getText());
@@ -73,7 +74,7 @@ public class Calculadora {
                             firstNumber[0] = currentNumber;
                         }
 
-                        operation[0] = label;
+                        operation[0] = button.getText();
                         display.setText("");
                         break;
 
@@ -90,11 +91,14 @@ public class Calculadora {
                         }
 
                         // ===== Write the operation to history.txt =====
-                        try {
+                        try 
+                        {
                             PrintWriter writer = new PrintWriter(new FileWriter("history.txt", true));
                             writer.println(firstNumber[0] + " " + operation[0] + " " + secondNumber + " = " + result);
                             writer.close();
-                        } catch (IOException ex) {
+                        }
+                        catch (IOException ex) 
+                        {
                             ex.printStackTrace();
                         }
                         // ===============================================
@@ -132,7 +136,7 @@ public class Calculadora {
 
                     // === Numbers 0-9 ===
                     default:
-                        display.setText(display.getText() + label);
+                        display.setText(display.getText() + button.getText());
                         break;
                 }
             });
