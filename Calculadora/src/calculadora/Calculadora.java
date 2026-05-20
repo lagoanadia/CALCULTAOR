@@ -6,6 +6,15 @@ import java.awt.event.*;
 import java.io.*;
 
 public class Calculadora {
+    public static double calcular(double a, double b, String op) {
+    switch (op) {
+        case "+": return a + b;
+        case "-": return a - b;
+        case "x": return a * b;
+        case "÷": return a / b;
+    }
+    return 0;
+}
 
     public static void main(String[] args) {
 
@@ -63,13 +72,7 @@ public class Calculadora {
                         double currentNumber = Double.parseDouble(display.getText());
 
                         if (!operation[0].equals("")) {
-                            switch (operation[0]) {
-                                case "+": firstNumber[0] = firstNumber[0] + currentNumber; break;
-                                case "-": firstNumber[0] = firstNumber[0] - currentNumber; break;
-                                case "x": firstNumber[0] = firstNumber[0] * currentNumber; break;
-                                case "÷": firstNumber[0] = firstNumber[0] / currentNumber; break;
-                            }
-                            display.setText(String.valueOf(firstNumber[0]));
+                            firstNumber[0] = calcular(firstNumber[0], currentNumber, operation[0]);
                         } else {
                             firstNumber[0] = currentNumber;
                         }
@@ -82,14 +85,8 @@ public class Calculadora {
                     case "=":
                         if (operation[0].equals("") || display.getText().equals("")) break;
                         double secondNumber = Double.parseDouble(display.getText());
-                        double result = 0;
-                        switch (operation[0]) {
-                            case "+": result = firstNumber[0] + secondNumber; break;
-                            case "-": result = firstNumber[0] - secondNumber; break;
-                            case "x": result = firstNumber[0] * secondNumber; break;
-                            case "÷": result = firstNumber[0] / secondNumber; break;
-                        }
-
+                        double result = calcular(firstNumber[0], secondNumber, operation[0]);
+                           
                         // ===== Write the operation to history.txt =====
                         try 
                         {
@@ -119,7 +116,7 @@ public class Calculadora {
                     case "<":
                         String text = display.getText();
                         if (text.length() > 0) {
-                            display.setText(text.substring(0, text.length() - 1));
+                             display.setText(text.substring(0, text.length() - 1));
                         }
                         break;
 
